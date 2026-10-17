@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rider App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0F1412;--card:#1A211E;--line:#2A3530;--ink:#F2F5F3;--mute:#94A39B;--acc:#C8F25A;--bad:#FF7A66;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.45 Figtree,system-ui,sans-serif}
+h1,h2,h3,.brand{font-family:'Space Grotesk',Figtree,sans-serif;margin:0}
+[hidden]{display:none!important}
+button,input{font:inherit;color:inherit}
+input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#101714}
+label{display:block;font-weight:500;font-size:13px;margin:12px 0 4px;color:var(--mute)}
+button,a.btn{cursor:pointer;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:12px 16px;font-weight:700;text-decoration:none;color:var(--ink);display:inline-block;text-align:center}
+button.p{background:var(--acc);border-color:var(--acc);color:#0F1412}
+button.big,a.btn.big{width:100%;padding:15px;font-size:17px;margin-top:8px}
+button:disabled{opacity:.5}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.mute{color:var(--mute)}
+.wrap{max-width:560px;margin:0 auto;padding:14px}
+.narrow{margin-top:7vh}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.msg{color:var(--bad);min-height:1.3em;margin:10px 0 0}
+header.top{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);z-index:5}
+.sw{display:flex;align-items:center;gap:10px;margin:0;font-weight:700;color:var(--ink);font-size:16px}
+.sw input{width:52px;height:30px;appearance:none;background:#3a4640;border-radius:15px;position:relative;cursor:pointer;border:0;padding:0}
+.sw input::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .15s}
+.sw input:checked{background:#3FAE6B}
+.sw input:checked::after{left:25px}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:0 14px 10px;max-width:560px;margin:0 auto}
+.tabs button{padding:9px 4px;font-size:14px;background:none;border-color:transparent;color:var(--mute)}
+.tabs button.on{background:var(--card);color:var(--acc)}
+.tabs b{background:var(--acc);color:#0F1412;border-radius:99px;padding:0 7px;margin-left:4px;font-size:12px}
+.pay{font-size:28px;font-family:'Space Grotesk';font-weight:700;color:var(--acc)}
+.stop{padding:8px 0 8px 14px;border-left:3px solid var(--line);margin:6px 0 6px 4px}
+.stop.cur{border-left-color:var(--acc)}
+.stop small{color:var(--mute);display:block;text-transform:uppercase;letter-spacing:.06em;font-size:11px}
+.cash{background:#3a2f12;color:#FFD66B;border-radius:10px;padding:8px 12px;margin:8px 0;font-weight:700}
+.empty{padding:28px;text-align:center;color:var(--mute);border:2px dashed var(--line);border-radius:14px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stats .card{margin:0}.stats b{display:block;font:700 24px 'Space Grotesk'}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#fff;color:#111;padding:10px 16px;border-radius:10px;z-index:30;max-width:90vw}
+</style>
+</head>
+<body>
+
+<section id="v-auth" class="wrap narrow" hidden>
+  <h1>Ride with us</h1>
+  <p class="mute">Deliver orders and earn on every trip.</p>
+  <div class="card">
+    <div class="tabs" id="auth-tabs" style="grid-template-columns:1fr 1fr;padding:0 0 8px"><button class="on" data-a="login">Log in</button><button data-a="signup">Join as rider</button></div>
+    <form id="f-login">
+      <label for="l-email">Email</label><input id="l-email" name="email" type="email" required autocomplete="email">
+      <label for="l-pass">Password</label><input id="l-pass" name="password" type="password" required autocomplete="current-password">
+      <button class="p big" type="submit">Log in</button>
+    </form>
+    <form id="f-signup" hidden>
+      <label for="s-name">Full name</label><input id="s-name" name="name" required>
+      <label for="s-phone">Phone</label><input id="s-phone" name="phone" type="tel" required>
+      <label for="s-email">Email</label><input id="s-email" name="email" type="email" required autocomplete="email">
+      <label for="s-pass">Password (min 6 characters)</label><input id="s-pass" name="password" type="password" minlength="6" required autocomplete="new-password">
+      <button class="p big" type="submit">Create rider account</button>
+    </form>
+    <p class="msg" id="auth-msg" role="alert"></p>
+  </div>
+</section>
+
+<section id="v-wait" class="wrap narrow" hidden>
+  <h1>Almost there</h1>
+  <p class="mute">Your account is waiting for approval. You can start taking orders as soon as an admin approves it. Upload your ID below to speed this up.</p>
+  <div class="card" id="wait-docs"></div>
+  <button class="p big" id="recheck">Check approval status</button>
+  <button class="big" id="wait-out">Log out</button>
+</section>
+
+<section id="v-app" hidden>
+  <header class="top">
+    <div class="wrap row" style="padding-bottom:8px">
+      <label class="sw"><input type="checkbox" id="on-sw" aria-label="Go online"><span id="on-lbl">Offline</span></label>
+      <span id="who" class="mute"></span>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button data-t="avail" class="on">Nearby<b id="n-avail">0</b></button><button data-t="mine">My trip<b id="n-mine">0</b></button>
+      <button data-t="earn">Earnings</button><button data-t="acct">Account</button>
+    </nav>
+  </header>
+  <main class="wrap">
+    <div id="t-avail"></div><div id="t-mine" hidden></div><div id="t-earn" hidden></div>
+    <div id="t-acct" hidden><div class="card" id="acct-box"></div><button class="big" id="out">Log out</button></div>
+  </main>
+</section>
+<div id="toast" hidden role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"></script>
+<script>
+// ======== CONFIG (same values as the other two sites) ========
+const SUPABASE_URL = 'https://dplaucmoydabawybbjum.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_56pYKQPr8pGh7fRH4o31fw_ydzP4HFy';
+// =============================================================
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+let me, prof, online = false, pos = null, avail = [], mine = [], done = [], chan, pollId, watchId, pushId, wl, audio, first = true;
+
+function h(tag, a = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(a)) {
+    if (k === 'class') e.className = v; else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) e.setAttribute(k, v);
+  }
+  kids.flat().forEach(c => { if (c === false || c == null) return; e.append(c instanceof Node ? c : document.createTextNode(c)); });
+  return e;
+}
+const money = n => '₹' + (+n).toFixed(2).replace(/\.00$/, '');
+let tt; function toast(m) { const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => t.hidden = true, 3500); }
+const show = id => ['v-auth', 'v-wait', 'v-app'].forEach(v => $(v).hidden = v !== id);
+function km(a, b, c, d) { const r = x => x * Math.PI / 180, t = Math.sin(r(c - a) / 2) ** 2 + Math.cos(r(a)) * Math.cos(r(c)) * Math.sin(r(d - b) / 2) ** 2; return 12742 * Math.asin(Math.sqrt(t)); }
+function beep() { try { audio = audio || new AudioContext(); [660, 880, 1100].forEach((f, i) => { const o = audio.createOscillator(), g = audio.createGain(), t = audio.currentTime + i * .18; o.frequency.value = f; o.connect(g); g.connect(audio.destination); g.gain.setValueAtTime(.3, t); g.gain.exponentialRampToValueAtTime(.001, t + .16); o.start(t); o.stop(t + .17); }); } catch (e) {} }
+document.addEventListener('click', () => { try { audio = audio || new AudioContext(); audio.resume(); } catch (e) {} });
+const mapLink = (lat, lng, addr) => 'https://www.google.com/maps/dir/?api=1&destination=' + (lat != null && lng != null ? lat + ',' + lng : encodeURIComponent(addr || ''));
+
+// ---------- auth ----------
+$('auth-tabs').onclick = e => {
+  const a = e.target.dataset.a; if (!a) return;
+  [...$('auth-tabs').children].forEach(b => b.classList.toggle('on', b === e.target));
+  $('f-login').hidden = a !== 'login'; $('f-signup').hidden = a !== 'signup'; $('auth-msg').textContent = '';
+};
+$('f-login').onsubmit = async e => {
+  e.preventDefault(); const f = new FormData(e.target);
+  const { data, error } = await db.auth.signInWithPassword({ email: f.get('email'), password: f.get('password') });
+  if (error) return $('auth-msg').textContent = error.message; boot(data.user);
+};
+$('f-signup').onsubmit = async e => {
+  e.preventDefault(); const f = new FormData(e.target);
+  const { data, error } = await db.auth.signUp({ email: f.get('email'), password: f.get('password'), options: { data: { role: 'partner', name: f.get('name'), phone: f.get('phone') } } });
+  if (error) return $('auth-msg').textContent = error.message;
+  if (!data.session) return $('auth-msg').textContent = 'Check your email to confirm your account, then log in.'; boot(data.user);
+};
+async function logout() {
+  if (online) { online = false; await push(); } stopTracking(); if (chan) db.removeChannel(chan); clearInterval(pollId);
+  await db.auth.signOut(); show('v-auth');
+}
+$('out').onclick = $('wait-out').onclick = logout;
+
+async function boot(user) {
+  const { data: p } = await db.from('profiles').select('role,is_approved,name,phone').eq('id', user.id).maybeSingle();
+  if (!p || p.role !== 'partner') {
+    await db.auth.signOut(); show('v-auth');
+    return $('auth-msg').textContent = 'This site is for delivery partners. Customers and shop owners have their own sites.';
+  }
+  me = user; prof = p;
+  if (!p.is_approved) { $('wait-docs').replaceChildren(...docsBox()); return show('v-wait'); }
+  $('who').textContent = p.name || ''; $('acct-box').replaceChildren(h('b', {}, p.name), h('p', { class: 'mute' }, p.phone || ''), ...docsBox());
+  show('v-app'); await load();
+  if (chan) db.removeChannel(chan);
+  chan = db.channel('rider-orders').on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => load()).subscribe();
+  clearInterval(pollId); pollId = setInterval(load, 20000);
+}
+$('recheck').onclick = async () => { const { data } = await db.auth.getUser(); if (data.user) boot(data.user); };
+function docsBox() {
+  const inp = h('input', { type: 'file', accept: 'image/*,application/pdf', 'aria-label': 'ID document' });
+  return [h('h3', {}, 'ID and licence'), h('p', { class: 'mute' }, 'Upload a clear photo of your ID or driving licence (max 5 MB). Only you and admins can see it.'), inp,
+    h('button', { class: 'big', onclick: async () => {
+      const f = inp.files[0]; if (!f) return toast('Choose a file first.'); if (f.size > 5 * 1024 * 1024) return toast('File is larger than 5 MB.');
+      const ext = (f.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const { error } = await db.storage.from('partner-docs').upload(`${me.id}/${Date.now()}.${ext}`, f, { contentType: f.type });
+      toast(error ? error.message : 'Uploaded. Thank you.'); if (!error) inp.value = '';
+    } }, 'Upload')];
+}
+
+// ---------- online + location ----------
+async function push() {
+  const { error } = await db.from('partner_status').upsert({ partner_id: me.id, is_online: online, lat: pos?.lat ?? null, lng: pos?.lng ?? null, updated_at: new Date().toISOString() });
+  if (error) toast(error.message);
+}
+async function grabWake() { try { if (online && navigator.wakeLock) wl = await navigator.wakeLock.request('screen'); } catch (e) {} }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') grabWake(); });
+function startTracking() {
+  if (!navigator.geolocation) return toast('This device cannot share location.');
+  watchId = navigator.geolocation.watchPosition(p => { pos = { lat: p.coords.latitude, lng: p.coords.longitude }; renderAll(); },
+    () => toast('Location is blocked. Allow it so customers can follow your trip.'), { enableHighAccuracy: true, maximumAge: 5000 });
+  pushId = setInterval(push, 10000); grabWake();
+}
+function stopTracking() { if (watchId != null) navigator.geolocation.clearWatch(watchId); clearInterval(pushId); watchId = null; try { wl?.release(); } catch (e) {} }
+$('on-sw').onchange = async e => {
+  if (!e.target.checked && mine.length && !confirm('You have an active delivery. Go offline anyway?')) { e.target.checked = true; return; }
+  online = e.target.checked; $('on-lbl').textContent = online ? 'Online' : 'Offline';
+  if (online) startTracking(); else stopTracking(); await push(); renderAll();
+};
+
+// ---------- orders ----------
+async function load() {
+  const { data, error } = await db.from('orders').select('*, order_items(*), shops(name,address,lat,lng)').order('created_at', { ascending: false }).limit(200);
+  if (error) return toast(error.message);
+  const seen = new Set(avail.map(o => o.id));
+  avail = data.filter(o => o.status === 'ready' && !o.partner_id);
+  mine = data.filter(o => o.partner_id === me.id && ['ready', 'picked_up'].includes(o.status));
+  done = data.filter(o => o.partner_id === me.id && o.status === 'delivered');
+  if (!first && online && avail.some(o => !seen.has(o.id))) { beep(); toast('New delivery nearby'); }
+  first = false; renderAll();
+}
+async function act(fn, args, okMsg) {
+  const { error } = await db.rpc(fn, args); if (error) toast(error.message); else { if (okMsg) toast(okMsg); load(); }
+}
+function renderAll() {
+  $('n-avail').textContent = online ? avail.length : 0; $('n-mine').textContent = mine.length;
+  // nearby
+  const list = [...avail]; if (pos) list.sort((a, b) => km(pos.lat, pos.lng, a.shops.lat ?? 0, a.shops.lng ?? 0) - km(pos.lat, pos.lng, b.shops.lat ?? 0, b.shops.lng ?? 0));
+  $('t-avail').replaceChildren(...(!online ? [h('p', { class: 'empty' }, 'You are offline. Switch Online at the top to see deliveries near you.')]
+    : list.length ? list.map(offer) : [h('p', { class: 'empty' }, 'No deliveries right now. Keep this screen open and you will hear a sound when one appears.')]));
+  // my trips
+  $('t-mine').replaceChildren(...(mine.length ? mine.map(trip) : [h('p', { class: 'empty' }, 'No active delivery. Accept one from Nearby.')]));
+  // earnings
+  const day = new Date(); day.setHours(0, 0, 0, 0); const wk = new Date(day); wk.setDate(wk.getDate() - 6);
+  const sum = (d, f) => done.filter(o => new Date(o.delivered_at || o.created_at) >= d).reduce((a, o) => a + +f(o), 0);
+  const earn = o => o.delivery_earning, cod = o => o.payment_method === 'cod' ? o.total : 0;
+  $('t-earn').replaceChildren(
+    h('div', { class: 'stats' }, [['Today', money(sum(day, earn))], ['Last 7 days', money(sum(wk, earn))], ['Deliveries today', done.filter(o => new Date(o.delivered_at) >= day).length], ['Cash collected today', money(sum(day, cod))]]
+      .map(([l, v]) => h('div', { class: 'card' }, h('span', { class: 'mute' }, l), h('b', {}, v)))),
+    h('p', { class: 'mute' }, 'Cash collected is money you took from customers on cash-on-delivery orders.'),
+    ...(done.length ? done.slice(0, 30).map(o => h('div', { class: 'card row' }, h('span', {}, h('b', {}, o.shops?.name || 'Shop'), h('div', { class: 'mute' }, new Date(o.delivered_at || o.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }))), h('b', {}, '+' + money(o.delivery_earning)))) : [h('p', { class: 'empty' }, 'Completed deliveries and your earnings will appear here.')]));
+}
+function offer(o) {
+  const s = o.shops || {}, trip = s.lat != null && o.delivery_lat != null ? km(s.lat, s.lng, o.delivery_lat, o.delivery_lng) : null;
+  const toShop = pos && s.lat != null ? km(pos.lat, pos.lng, s.lat, s.lng) : null;
+  return h('div', { class: 'card' },
+    h('div', { class: 'row' }, h('span', { class: 'pay' }, money(o.delivery_fee)), h('span', { class: 'mute' }, [toShop != null ? toShop.toFixed(1) + ' km to shop' : null, trip != null ? trip.toFixed(1) + ' km trip' : null].filter(Boolean).join(', '))),
+    h('div', { class: 'stop cur' }, h('small', {}, 'Pickup'), h('b', {}, s.name), h('div', { class: 'mute' }, s.address)),
+    h('div', { class: 'stop' }, h('small', {}, 'Drop'), h('div', {}, o.delivery_address)),
+    o.payment_method === 'cod' && h('div', { class: 'cash' }, 'Collect ' + money(o.total) + ' cash from the customer'),
+    h('button', { class: 'p big', onclick: () => act('accept_delivery', { p_order_id: o.id }, 'Delivery accepted. Head to the shop.') }, 'Accept delivery'));
+}
+function trip(o) {
+  const s = o.shops || {}, picked = o.status === 'picked_up';
+  return h('div', { class: 'card' },
+    h('div', { class: 'row' }, h('b', {}, '#' + o.id.slice(0, 6)), h('span', { class: 'pay' }, money(o.delivery_earning))),
+    h('div', { class: 'stop' + (picked ? '' : ' cur') }, h('small', {}, 'Pickup'), h('b', {}, s.name), h('div', { class: 'mute' }, s.address),
+      o.order_items.map(i => h('div', {}, i.qty + '× ' + i.name))),
+    h('div', { class: 'stop' + (picked ? ' cur' : '') }, h('small', {}, 'Drop'), h('b', {}, o.customer_name || 'Customer'), h('div', { class: 'mute' }, o.delivery_address),
+      o.customer_phone && h('div', {}, h('a', { href: 'tel:' + o.customer_phone, style: 'color:var(--acc)' }, 'Call ' + o.customer_phone)),
+      o.notes && h('div', { class: 'mute' }, 'Note: ' + o.notes)),
+    o.payment_method === 'cod' ? h('div', { class: 'cash' }, 'Collect ' + money(o.total) + ' cash') : h('div', { class: 'mute' }, 'Already paid online. Do not collect cash.'),
+    picked ? h('a', { class: 'btn big', href: mapLink(o.delivery_lat, o.delivery_lng, o.delivery_address), target: '_blank', rel: 'noopener' }, 'Navigate to customer')
+           : h('a', { class: 'btn big', href: mapLink(s.lat, s.lng, s.address), target: '_blank', rel: 'noopener' }, 'Navigate to shop'),
+    picked ? h('button', { class: 'p big', onclick: () => { if (confirm('Confirm you handed over the order' + (o.payment_method === 'cod' ? ' and collected ' + money(o.total) : '') + '?')) act('update_order_status', { p_order_id: o.id, p_new_status: 'delivered' }, 'Delivered. Nice work.'); } }, 'Mark delivered')
+           : h('button', { class: 'p big', onclick: () => act('update_order_status', { p_order_id: o.id, p_new_status: 'picked_up' }, 'Picked up. Drive safe.') }, 'Picked up from shop'));
+}
+
+// ---------- tabs + start ----------
+$('tabs').onclick = e => {
+  const t = e.target.closest('button')?.dataset.t; if (!t) return;
+  [...$('tabs').children].forEach(b => b.classList.toggle('on', b.dataset.t === t));
+  ['avail', 'mine', 'earn', 'acct'].forEach(x => $('t-' + x).hidden = x !== t);
+};
+(async () => { const { data: { session } } = await db.auth.getSession(); session ? boot(session.user) : show('v-auth'); })();
+</script>
+</body>
+</html>
